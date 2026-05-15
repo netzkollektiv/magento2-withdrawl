@@ -197,7 +197,7 @@ class Submit implements HttpPostActionInterface
 
             // Create withdrawal record
             $connection = $this->resource->getConnection();
-            $connection->insert('zwernemann_withdrawal', [
+            $connection->insert($this->resource->getTableName('zwernemann_withdrawal'), [
                 'order_id'          => $order->getEntityId(),
                 'order_increment_id' => $order->getIncrementId(),
                 'customer_email'    => $order->getCustomerEmail(),
