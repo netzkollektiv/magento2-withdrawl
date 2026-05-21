@@ -7,6 +7,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Session\Generic as Session;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
@@ -21,6 +22,7 @@ class Find implements HttpPostActionInterface
     private $orderCollectionFactory;
     private $formKeyValidator;
     private $config;
+    private $session;
 
     public function __construct(
         RequestInterface $request,
@@ -29,7 +31,8 @@ class Find implements HttpPostActionInterface
         PageFactory $pageFactory,
         OrderCollectionFactory $orderCollectionFactory,
         FormKeyValidator $formKeyValidator,
-        Config $config
+        Config $config,
+        Session $session
     ) {
         $this->request = $request;
         $this->redirectFactory = $redirectFactory;
@@ -38,6 +41,7 @@ class Find implements HttpPostActionInterface
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->formKeyValidator = $formKeyValidator;
         $this->config = $config;
+        $this->session = $session;
     }
 
     public function execute()
@@ -76,10 +80,10 @@ class Find implements HttpPostActionInterface
             return $redirect->setPath('withdrawal/guest/search');
         }
 
-        // Redirect to guest view page
+        $this->session->setGuestWithdrawalEmail($email);
+
         return $redirect->setPath('withdrawal/guest/view', [
             'order_id' => $order->getId(),
-            'email' => $email,
         ]);
     }
 }

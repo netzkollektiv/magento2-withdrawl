@@ -124,17 +124,17 @@ class Submit implements HttpPostActionInterface
             $selectedItemIds = array_map('intval', (array) $this->request->getParam('selected_items', []));
             $itemQtyMap = (array) $this->request->getParam('item_qty', []);
 
+            // If partial withdrawal is disabled, force-select all order items
+            if (!$partialAllowed) {
+                $selectedItemIds = array_keys($orderItemsById);
+                $itemQtyMap = [];
+            }
+
             if (empty($selectedItemIds)) {
                 $this->messageManager->addErrorMessage(
                     __('Please select at least one item to withdraw.')
                 );
                 return $redirect->setPath('withdrawal/index/view', ['order_id' => $orderId]);
-            }
-
-            // If partial withdrawal is disabled, force-select all order items
-            if (!$partialAllowed) {
-                $selectedItemIds = array_keys($orderItemsById);
-                $itemQtyMap = [];
             }
 
             // Validate that all selected items belong to this order
