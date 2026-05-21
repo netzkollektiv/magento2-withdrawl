@@ -35,19 +35,19 @@ $partialAllowed = $block->isPartialWithdrawalAllowed();
             </div>
 
             <?php if ($block->hasPartialWithdrawal()): ?>
-            <div class="message notice" style="margin-top: 20px;">
+            <div class="message notice withdrawal-partial-notice">
                 <span><?= $block->escapeHtml(__('Some items from this order have already been withdrawn. The items marked below are no longer available for withdrawal.')) ?></span>
             </div>
             <?php endif; ?>
 
-            <div class="withdrawal-info-box" style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 4px;">
+            <div class="withdrawal-info-box">
                 <?php if ($block->hasExistingWithdrawal()): ?>
                     <div class="message info">
                         <span><?= $block->escapeHtml(__('All items of this order have already been withdrawn.')) ?></span>
                     </div>
                 <?php elseif ($block->isWithdrawalAllowed()): ?>
                     <?php $deadline = $block->getWithdrawalDeadline(); ?>
-                    <div class="withdrawal-deadline" style="margin-bottom: 15px;">
+                    <div class="withdrawal-deadline">
                         <?php if ($deadline !== ''): ?>
                         <p>
                             <strong><?= $block->escapeHtml(__('Withdrawal deadline:')) ?></strong>
@@ -71,15 +71,15 @@ $partialAllowed = $block->isPartialWithdrawalAllowed();
                             <input type="hidden" name="guest_email" value="<?= $block->escapeHtmlAttr($block->getGuestEmail()) ?>"/>
                         <?php endif; ?>
 
-                        <div class="box box-order-items" style="margin-bottom: 20px;">
-                            <strong class="box-title" style="display: block; margin-bottom: 10px;">
+                        <div class="box box-order-items">
+                            <strong class="box-title">
                                 <span><?= $block->escapeHtml(__('Select Items to Withdraw')) ?></span>
                             </strong>
                             <table class="table table-order-items" id="withdrawal-order-items">
                                 <thead>
                                     <tr>
                                         <?php if ($partialAllowed): ?>
-                                        <th class="col select" style="width: 40px;">
+                                        <th class="col col-withdrawal-select">
                                             <input type="checkbox" id="withdrawal-select-all" title="<?= $block->escapeHtmlAttr(__('Select All')) ?>" checked/>
                                         </th>
                                         <?php endif; ?>
@@ -100,13 +100,11 @@ $partialAllowed = $block->isPartialWithdrawalAllowed();
                                     $isWithdrawn = in_array($itemId, $withdrawnItemIds, true);
                                     $qtyOrdered = (int) $item->getQtyOrdered();
                                     ?>
-                                    <tr class="<?= $isWithdrawn ? 'withdrawal-item-disabled' : 'withdrawal-item-selectable' ?>"
-                                        style="<?= $isWithdrawn ? 'opacity:0.5;' : '' ?>">
+                                    <tr class="<?= $isWithdrawn ? 'withdrawal-item-disabled withdrawal-item-withdrawn' : 'withdrawal-item-selectable' ?>">
                                         <?php if ($partialAllowed): ?>
-                                        <td class="col select">
+                                        <td class="col col-withdrawal-select">
                                             <?php if ($isWithdrawn): ?>
-                                                <span class="withdrawal-status-badge"
-                                                      style="font-size:11px; color:#666; font-style:italic;">
+                                                <span class="withdrawal-status-badge">
                                                     <?= $block->escapeHtml(__('Withdrawn')) ?>
                                                 </span>
                                             <?php else: ?>
@@ -138,7 +136,6 @@ $partialAllowed = $block->isPartialWithdrawalAllowed();
                                                        min="1"
                                                        max="<?= $qtyOrdered ?>"
                                                        class="input-text withdrawal-qty-input"
-                                                       style="width: 60px;"
                                                        data-item-id="<?= $itemId ?>"/>
                                             <?php else: ?>
                                                 &mdash;
@@ -180,31 +177,15 @@ $partialAllowed = $block->isPartialWithdrawalAllowed();
                             }
                         }
                     </script>
-                    <script>
-                    require(['jquery'], function ($) {
-                        'use strict';
-
-                        // Select-all checkbox
-                        $('#withdrawal-select-all').on('change', function () {
-                            $('.withdrawal-item-checkbox').prop('checked', this.checked);
-                        });
-
-                        // Keep select-all in sync with individual checkboxes
-                        $(document).on('change', '.withdrawal-item-checkbox', function () {
-                            var total = $('.withdrawal-item-checkbox').length;
-                            var checked = $('.withdrawal-item-checkbox:checked').length;
-                            $('#withdrawal-select-all').prop('indeterminate', checked > 0 && checked < total);
-                            $('#withdrawal-select-all').prop('checked', checked === total);
-                        });
-
-                        // Disable qty input when checkbox is unchecked
-                        $(document).on('change', '.withdrawal-item-checkbox', function () {
-                            var itemId = $(this).val();
-                            var qtyInput = $('input[name="item_qty[' + itemId + ']"]');
-                            qtyInput.prop('disabled', !this.checked);
-                        });
-                    });
+                    <?php if ($partialAllowed): ?>
+                    <script type="text/x-magento-init">
+                        {
+                            "#withdrawal-select-all": {
+                                "Zwernemann_Withdrawal/js/withdrawal-select-all": {}
+                            }
+                        }
                     </script>
+                    <?php endif; ?>
                 <?php else: ?>
                     <div class="message warning">
                         <span><?= $block->escapeHtml(__('The withdrawal period for this order has expired. The deadline was: %1', $block->getWithdrawalDeadline())) ?></span>

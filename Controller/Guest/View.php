@@ -7,6 +7,7 @@ use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Session\Generic as Session;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Zwernemann\Withdrawal\Helper\Config;
@@ -19,6 +20,7 @@ class View implements HttpGetActionInterface
     private $messageManager;
     private $orderRepository;
     private $config;
+    private $session;
 
     public function __construct(
         RequestInterface $request,
@@ -26,7 +28,8 @@ class View implements HttpGetActionInterface
         RedirectFactory $redirectFactory,
         ManagerInterface $messageManager,
         OrderRepositoryInterface $orderRepository,
-        Config $config
+        Config $config,
+        Session $session
     ) {
         $this->request = $request;
         $this->pageFactory = $pageFactory;
@@ -34,6 +37,7 @@ class View implements HttpGetActionInterface
         $this->messageManager = $messageManager;
         $this->orderRepository = $orderRepository;
         $this->config = $config;
+        $this->session = $session;
     }
 
     public function execute()
@@ -46,7 +50,7 @@ class View implements HttpGetActionInterface
         }
 
         $orderId = (int) $this->request->getParam('order_id');
-        $email = urldecode((string) $this->request->getParam('email'));
+        $email = (string) $this->session->getGuestWithdrawalEmail();
 
         if (!$orderId || !$email) {
             $this->messageManager->addErrorMessage(__('Invalid request.'));

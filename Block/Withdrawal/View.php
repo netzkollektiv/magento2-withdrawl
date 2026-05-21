@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Zwernemann\Withdrawal\Block\Withdrawal;
 
+use Magento\Framework\Session\Generic as Session;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\App\RequestInterface;
@@ -16,6 +17,7 @@ class View extends Template
     private $orderRepository;
     private $config;
     private $withdrawalRepository;
+    private $session;
     private $order;
 
     /** @var int[]|null */
@@ -27,6 +29,7 @@ class View extends Template
         OrderRepositoryInterface $orderRepository,
         Config $config,
         WithdrawalRepository $withdrawalRepository,
+        Session $session,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -34,6 +37,7 @@ class View extends Template
         $this->orderRepository = $orderRepository;
         $this->config = $config;
         $this->withdrawalRepository = $withdrawalRepository;
+        $this->session = $session;
     }
 
     public function getOrder()
@@ -144,12 +148,12 @@ class View extends Template
 
     public function isGuest(): bool
     {
-        return (bool) $this->request->getParam('email');
+        return !empty($this->session->getGuestWithdrawalEmail());
     }
 
     public function getGuestEmail(): string
     {
-        return urldecode((string) $this->request->getParam('email'));
+        return (string) $this->session->getGuestWithdrawalEmail();
     }
 
     public function getFormattedDate(string $date): string
