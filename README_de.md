@@ -235,6 +235,10 @@ Die Datenbanktabellen `zwernemann_withdrawal` und `zwernemann_withdrawal_items` 
 
 ## Versionshistorie
 
+### 1.7.2
+
+- Bugfix: Auslagerung der Select-All-Logik in ein AMD-Component, Entfernung von Inline-Styles zugunsten von CSS, Umbenennung der reservierten „select“-Klasse, Speicherung der Gast-E-Mail in der Session statt in der URL sowie Korrektur der Validierungslogik beim Auswählen von Positionen.
+
 ### 1.7.1
 
 - Bugfix: Datenbankfehler bei Shops mit Tabellenpräfix
