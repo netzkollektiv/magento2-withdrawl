@@ -158,7 +158,7 @@ class Submit implements HttpPostActionInterface
             $alreadyWithdrawnSelected = array_intersect($selectedItemIds, $alreadyWithdrawnIds);
             if (!empty($alreadyWithdrawnSelected)) {
                 $this->messageManager->addErrorMessage(
-                    __('One or more selected items have already been withdrawn.')
+                    __('One or more of the selected items have already been withdrawn and cannot be withdrawn again.')
                 );
                 return $redirect->setPath('withdrawal/index/view', ['order_id' => $orderId]);
             }
@@ -253,9 +253,12 @@ class Submit implements HttpPostActionInterface
             );
             $this->emailSender->sendAdminEmail($templateVars);
 
-            return $redirect->setPath('withdrawal/index/success', [
-                'order_id' => $orderId,
-            ]);
+            // Store the order id in the session instead of exposing it in the URL.
+            // This binds the success page to the visitor's session and prevents
+            // enumeration of /withdrawal/index/success/order_id/X.
+            $this->customerSession->setWithdrawalSuccessOrderId($orderId);
+
+            return $redirect->setPath('withdrawal/index/success');
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(__('Unable to submit withdrawal request. Please try again.'));
         }

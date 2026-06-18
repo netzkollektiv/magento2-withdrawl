@@ -22,7 +22,7 @@ In the *My Account > My Orders* view, a new column appears for each order. There
 
 - A **Withdrawal link**, as long as the period is active
 - The note **"Withdrawal submitted"**, if a withdrawal has already been made
-- The note **"Period expired"**, if the withdrawal period has passed
+- The note **"Withdrawal period expired"**, if the withdrawal period has passed
 
 Additionally, a **"Withdrawal Order"** button is displayed on the order details page.
 
