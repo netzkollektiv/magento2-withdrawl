@@ -235,7 +235,17 @@ Die Datenbanktabellen `zwernemann_withdrawal` und `zwernemann_withdrawal_items` 
 
 ## Versionshistorie
 
+### 1.8.0
+
+- Admin: In der Bestellhistorie wird jetzt ein Kommentar hinterlegt, wenn ein Widerruf bestätigt oder abgelehnt wird
+- Admin: Die Widerruf-Detailseite verlinkt nun die zugehörige(n) Sendung(en) und das jeweilige Lieferschein-PDF
+- Sicherheit: Die Widerruf-Erfolgsseite ist jetzt an die Kunden-Session gebunden und gibt keine enumerierbare Bestell-ID mehr in der URL preis; zusätzlich robots noindex,nofollow
+- Fix: Zeitzonen-Differenz zwischen Admin-Übersicht und Widerruf-Detailseite korrigiert
+- Übersetzungen in allen 24 Sprachen vervollständigt und korrigiert (Typ-Label in der Kunden-E-Mail und der Titel der Erfolgsseite werden nun übersetzt)
+- Präzisere Texte: In der Bestellübersicht steht nun "Widerrufsfrist abgelaufen"; klarere Meldung beim erneuten Auswählen bereits widerrufener Artikel
+  
 ### 1.7.3
+
 - Full PHP7.4 compatibility
   
 ### 1.7.2
