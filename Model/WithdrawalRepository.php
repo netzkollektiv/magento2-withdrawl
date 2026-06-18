@@ -5,6 +5,8 @@ namespace Zwernemann\Withdrawal\Model;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Zwernemann\Withdrawal\Api\WithdrawalRepositoryInterface;
 use Zwernemann\Withdrawal\Model\ResourceModel\Withdrawal as WithdrawalResource;
 use Zwernemann\Withdrawal\Model\ResourceModel\Withdrawal\CollectionFactory;
@@ -16,17 +18,23 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
     private $withdrawalFactory;
     private $collectionFactory;
     private $resourceConnection;
+    private $orderRepository;
+    private $dateTime;
 
     public function __construct(
         WithdrawalResource $resource,
         WithdrawalFactory $withdrawalFactory,
         CollectionFactory $collectionFactory,
-        ResourceConnection $resourceConnection
+        ResourceConnection $resourceConnection,
+        OrderRepositoryInterface $orderRepository,
+        DateTime $dateTime
     ) {
         $this->resource = $resource;
         $this->withdrawalFactory = $withdrawalFactory;
         $this->collectionFactory = $collectionFactory;
         $this->resourceConnection = $resourceConnection;
+        $this->orderRepository = $orderRepository;
+        $this->dateTime = $dateTime;
     }
 
     public function create($orderId, $comment = null)
@@ -76,8 +84,45 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
     public function updateStatus(int $entityId, string $status): void
     {
         $withdrawal = $this->getById($entityId);
+        $previousStatus = (string) $withdrawal->getData('status');
         $withdrawal->setData('status', $status);
         $this->resource->save($withdrawal);
+
+        // Record the decision in the order's status history, just like submission is.
+        // Only add a comment when the status actually changed to avoid duplicates
+        // (e.g. when the same status is applied again via mass action).
+        if ($status !== $previousStatus) {
+            $this->addOrderHistoryComment($withdrawal, $status);
+        }
+    }
+
+    /**
+     * Adds a status-history comment to the related order when a withdrawal is
+     * confirmed or rejected.
+     */
+    private function addOrderHistoryComment(Withdrawal $withdrawal, string $status): void
+    {
+        $orderId = (int) $withdrawal->getData('order_id');
+        if (!$orderId) {
+            return;
+        }
+
+        if ($status === 'confirmed') {
+            $comment = __('Withdrawal request confirmed by the shop on %1.', $this->dateTime->gmtDate());
+        } elseif ($status === 'rejected') {
+            $comment = __('Withdrawal request rejected by the shop on %1.', $this->dateTime->gmtDate());
+        } else {
+            return;
+        }
+
+        try {
+            $order = $this->orderRepository->get($orderId);
+            $order->addCommentToStatusHistory($comment);
+            $this->orderRepository->save($order);
+        } catch (\Exception $e) {
+            // Status update must not fail because of a missing/locked order.
+            return;
+        }
     }
 
     /**

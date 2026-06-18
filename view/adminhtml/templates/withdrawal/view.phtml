@@ -124,6 +124,14 @@ $items      = $block->getWithdrawalItems();
                     <?= $block->escapeHtml(__('View Order')) ?>
                 </a>
                 <?php endif; ?>
+                <?php foreach ($block->getShipments() as $shipment): ?>
+                <a href="<?= $block->escapeUrl($shipment['view_url']) ?>" class="action-default">
+                    <?= $block->escapeHtml(__('View Shipment #%1', $shipment['increment_id'])) ?>
+                </a>
+                <a href="<?= $block->escapeUrl($shipment['packing_slip_url']) ?>" class="action-default" target="_blank">
+                    <?= $block->escapeHtml(__('Print Packing Slip #%1', $shipment['increment_id'])) ?>
+                </a>
+                <?php endforeach; ?>
             </div>
         </div>
     </div>
