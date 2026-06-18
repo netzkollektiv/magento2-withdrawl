@@ -3,7 +3,7 @@
       layout="1column"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <title>Withdrawal Submitted</title>
+        <title>Withdrawal submitted</title>
     </head>
     <body>
         <referenceContainer name="content">
