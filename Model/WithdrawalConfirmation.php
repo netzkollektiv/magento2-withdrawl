@@ -51,16 +51,6 @@ class WithdrawalConfirmation implements WithdrawalConfirmationInterface
         $customerName = $this->resolveCustomerName($order);
         $itemsToSave = $this->buildWithdrawalItems($order);
 
-        $withdrawal = $this->withdrawalRepository->createFromOrder($order);
-        $this->withdrawalRepository->saveWithdrawalItems((int) $withdrawal->getId(), $itemsToSave);
-
-        $orderComment = __(
-            'Withdrawal requested via API on %1.',
-            $this->dateTime->gmtDate()
-        );
-        $order->addCommentToStatusHistory($orderComment);
-        $this->orderRepository->save($order);
-
         $itemLines = [];
         foreach ($itemsToSave as $savedItem) {
             $itemLines[] = sprintf(
@@ -85,9 +75,10 @@ class WithdrawalConfirmation implements WithdrawalConfirmationInterface
             $this->emailSender->sendCustomerEmail(
                 $templateVars,
                 (string) $order->getCustomerEmail(),
-                $customerName
+                $customerName,
+                true
             );
-            $this->emailSender->sendAdminEmail($templateVars);
+            $this->emailSender->sendAdminEmail($templateVars, true);
         } catch (\Exception $e) {
             $this->logger->error(
                 'Withdrawal confirmation email failed: ' . $e->getMessage(),
@@ -98,6 +89,15 @@ class WithdrawalConfirmation implements WithdrawalConfirmationInterface
             );
         }
 
+        $withdrawal = $this->withdrawalRepository->createFromOrder($order);
+        $this->withdrawalRepository->saveWithdrawalItems((int) $withdrawal->getId(), $itemsToSave);
+
+        $orderComment = __(
+            'Withdrawal requested via API on %1.',
+            $this->dateTime->gmtDate()
+        );
+        $order->addCommentToStatusHistory($orderComment);
+
         $statusCode = $this->config->getApiOrderStatus($storeId);
         if ($statusCode !== '') {
             $state = $this->getStateForStatus($statusCode);
@@ -106,9 +106,10 @@ class WithdrawalConfirmation implements WithdrawalConfirmationInterface
                     (string) __('Withdrawal confirmation sent via API.')
                 )->setIsCustomerNotified(true);
                 $order->setState($state)->setStatus($statusCode);
-                $this->orderRepository->save($order);
             }
         }
+
+        $this->orderRepository->save($order);
 
         return true;
     }
