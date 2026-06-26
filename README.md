@@ -233,7 +233,7 @@ The database tables `zwernemann_withdrawal` and `zwernemann_withdrawal_items` re
 
 ## Version History
 
-### 1.8.1
+### 1.8.2
 - Removed theme-specific CSS overrides and rely on native Magento button styling
 - Fixed withdrawal checks for unshipped orders in pending payment state
 - Fixed guest session data leaking into customer withdrawal requests
