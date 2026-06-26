@@ -120,30 +120,26 @@ class Config extends AbstractHelper
 
         return null;
     }
-
+    
     public function isWithdrawalAllowed(\Magento\Sales\Api\Data\OrderInterface $order): bool
     {
         if (!$this->isEnabled()) {
             return false;
         }
-
+    
+        // Not yet shipped → always allowed (goods not received).
+        $shipmentDate = $this->getLatestShipmentDate($order);
+        if ($shipmentDate === null) {
+            return true;
+        }
+    
         $allowedStatuses = $this->getAllowedOrderStatuses();
-        if (!empty($allowedStatuses) && !in_array($order->getStatus(), $allowedStatuses)) {
+        if (!empty($allowedStatuses) && !in_array($order->getStatus(), $allowedStatuses, true)) {
             return false;
         }
-
-        
-        $shipmentDate = $this->getLatestShipmentDate($order);
-
-        if ($shipmentDate === null) {
-            return true; // Not yet shipped: always allowed before receipt of goods
-        }
-
+    
         $now = new \DateTime();
-        $diff = $now->diff($shipmentDate);
-        $daysDiff = (int) $diff->days;
-
-        return $daysDiff <= $this->getWithdrawalPeriodDays();
+        return (int) $now->diff($shipmentDate)->days <= $this->getWithdrawalPeriodDays();
     }
 
     public function getWithdrawalDeadline(\Magento\Sales\Api\Data\OrderInterface $order): string
