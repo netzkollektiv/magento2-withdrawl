@@ -233,6 +233,13 @@ The database tables `zwernemann_withdrawal` and `zwernemann_withdrawal_items` re
 
 ## Version History
 
+### 1.8.1
+- Removed theme-specific CSS overrides and rely on native Magento button styling
+- Fixed withdrawal checks for unshipped orders in pending payment state
+- Fixed guest session data leaking into customer withdrawal requests
+- Optimized CSS loading by restricting withdrawal.css to withdrawal pages
+- Removed redundant BCC copy from customer withdrawal confirmation emails
+ 
 ### 1.8.0
 - Admin: order history now records a comment when a withdrawal request is confirmed or rejected
 - Admin: withdrawal detail page now links to the related shipment(s) and their packing slip PDF
